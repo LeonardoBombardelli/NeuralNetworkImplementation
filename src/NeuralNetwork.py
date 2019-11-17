@@ -5,7 +5,8 @@ def sigmoid(x):
     return 1/(1 + np.exp(-x))
 
 class NeuralNetwork():
-    def __init__(self):
+    def __init__(self, alpha):
+        self.alpha = alpha
         self.regularizationFactor = -1.0
         # Amount of neurons per layer
         self.architecture = []
@@ -116,6 +117,7 @@ class NeuralNetwork():
         print('Gradient:')
         print(self.gradient)
 
+    # n is the number of training instances
     def gradientRegularization(self, n):
         regularization = np.asarray(self.regularizationFactor * self.weights)
 
@@ -128,6 +130,10 @@ class NeuralNetwork():
         self.gradient = (1.0 / n) * (self.gradient + regularization)
         print('Gradient after Regularization:')
         print(self.gradient)
+
+    def updateTheta(self):
+        for i in range(len(self.weights)):
+            self.weights -= self.alpha * self.gradient
 
     # Batch
     def computeCost(self, x, y):
@@ -156,11 +162,14 @@ class NeuralNetwork():
         return self.activation[len(self.activation)-1][1:]
 
 if __name__ == "__main__":
-    a = NeuralNetwork()
+    a = NeuralNetwork(0.1)
     a.readNetworkArchitecture("testfiles/network.txt")
-    a.readNetworkWeights("testfiles/weights.txt")
+#    a.readNetworkWeights("testfiles/weights.txt")
     a.computeCost([[0.6969, 0.666]], [[1.0]])
 #    a.computeDeltas([0.6969, 0.666], [1.0])
     a.setGradientZero()
     a.updateGradient([0.6969, 0.666], [1.0])
     a.gradientRegularization(1)
+    a.updateTheta()
+    print('\n\nAfter updating Weights....')
+    a.computeCost([[0.6969, 0.666]], [[1.0]])
