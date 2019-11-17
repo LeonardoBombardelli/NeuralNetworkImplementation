@@ -6,6 +6,8 @@ def sigmoid(x):
 
 class NeuralNetwork():
     def __init__(self, alpha):
+        # Set to false for now
+        self.verbose = False
         self.alpha = alpha
         self.regularizationFactor = -1.0
         # Amount of neurons per layer
@@ -108,15 +110,6 @@ class NeuralNetwork():
             # Delta already starts in the first hidden layer
             self.gradient[i] += self.delta[i] * self.activation[i]
 
-        print('Weights:')
-        print(self.weights)
-        print('Activation:')
-        print(self.activation)
-        print('Delta:')
-        print(self.delta)
-        print('Gradient:')
-        print(self.gradient)
-
     # n is the number of training instances
     def gradientRegularization(self, n):
         regularization = np.asarray(self.regularizationFactor * self.weights)
@@ -124,12 +117,14 @@ class NeuralNetwork():
         for layer in regularization:
             layer[:,0] = 0
 
-        print('Regularization:')
-        print(regularization)
 
         self.gradient = (1.0 / n) * (self.gradient + regularization)
-        print('Gradient after Regularization:')
-        print(self.gradient)
+
+        if self.verbose:
+            print('Regularization:')
+            print(regularization)
+            print('Gradient after Regularization:')
+            print(self.gradient)
 
     def updateTheta(self):
         for i in range(len(self.weights)):
@@ -143,33 +138,56 @@ class NeuralNetwork():
         for i in range(len(x)):
             self.computeActivations(x[i])
             out = self.getPredictions();
-            print('Prediction: ', out)
-            print('Expected: ', y[i])
 
             j += ([-1*v for v in y[i]] * np.log(out) - (np.ones(len(y[i])) - y[i]) * np.log(1 - out)).sum()
         j /= len(x)
-        print('J: ', j)
+
 
         s = 0.0
         for w in self.weights:
             s += np.square(w[1:]).sum()
         s *= (self.regularizationFactor / (2*len(x)))
-        print('S: ', s)
+
+        if self.verbose:
+            print('J: ', j)
+            print('S: ', s)
 
         return j + s
 
     def getPredictions(self):
         return self.activation[len(self.activation)-1][1:]
 
+    def predict(self, x):
+        self.computeActivations(x)
+        return self.getPredictions()
+
+    def train(self, x, y, epochs):
+        for i in range(epochs):
+            print('EPOCH %d' % i)
+            print('Current error: ', self.computeCost(x, y))
+
+            self.setGradientZero()
+            for j in range(len(x)):
+                self.updateGradient(x[j], y[j])
+            self.gradientRegularization(len(x))
+
+            if self.verbose:
+                print('Weights:')
+                print(self.weights)
+                print('Activation:')
+                print(self.activation)
+                print('Delta:')
+                print(self.delta)
+                print('Gradient:')
+                print(self.gradient)
+
+            self.updateTheta()
+
 if __name__ == "__main__":
     a = NeuralNetwork(0.1)
     a.readNetworkArchitecture("testfiles/network.txt")
 #    a.readNetworkWeights("testfiles/weights.txt")
-    a.computeCost([[0.6969, 0.666]], [[1.0]])
-#    a.computeDeltas([0.6969, 0.666], [1.0])
-    a.setGradientZero()
-    a.updateGradient([0.6969, 0.666], [1.0])
-    a.gradientRegularization(1)
-    a.updateTheta()
-    print('\n\nAfter updating Weights....')
-    a.computeCost([[0.6969, 0.666]], [[1.0]])
+
+    print('Before training....', a.predict([0.6969, 0.666]), '\n')
+    a.train([[0.6969, 0.666]], [[1.0]], 5)
+    print('\n\nAfter training....', a.predict([0.6969, 0.666]))
