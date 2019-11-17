@@ -14,6 +14,8 @@ class NeuralNetwork():
         self.weights = []
         # Activation for each neuron of each layer
         self.activation = []
+        # Delta for each neuron of each layer
+        self.delta = []
 
     def readNetworkArchitecture(self, fileName):
         with open(fileName, "r") as openFile:
@@ -26,6 +28,10 @@ class NeuralNetwork():
         for i, neurons in enumerate(self.architecture):
             self.activation.append(np.zeros(neurons+1))
             self.activation[i][0] = 1.0
+
+            # No delta for input layer; also, no delta for biases
+            if i != 0:
+                self.delta.append(np.zeros(neurons))
 
         for i in range(len(self.architecture)-1):
             # Destination, origin; self.architecture[i]+1 to account for bias
@@ -56,6 +62,7 @@ class NeuralNetwork():
                 # Layer i, node j (all sources)
                 self.weights[i][j] = actualWeights
 
+    # Single element
     def computeActivations(self, input):
         assert len(input) == len(self.activation[0])-1, \
             'Error: input size is not compatible with network shape'
@@ -65,6 +72,25 @@ class NeuralNetwork():
             self.activation[i][1:] = (self.activation[i-1] * self.weights[i-1]).sum(1)
             self.activation[i][1:] = sigmoid(self.activation[i][1:])
 
+    # Single element
+    def computeDeltas(self, x, y):
+        self.computeActivations(x); out = self.getPredictions()
+        self.delta[len(self.delta)-1] = out - y
+
+        # Reverse loop, from last hidden layer to the first one
+        for i in range(len(self.delta)-2, -1, -1):
+            # Skips bias activation
+            self.delta[i] = (self.delta[i+1] * self.weights[i+1][:,1:]) * \
+                            self.activation[i+1][1:] * \
+                            (np.ones(len(self.activation[i+1][1:])) - self.activation[i+1][1:])
+        print('Weights:')
+        print(self.weights)
+        print('Activation:')
+        print(self.activation)
+        print('Delta:')
+        print(self.delta)
+
+    # Batch
     def computeCost(self, x, y):
         assert len(x) == len(y), "Error: number of entries and labels don't match"
 
@@ -93,5 +119,6 @@ class NeuralNetwork():
 if __name__ == "__main__":
     a = NeuralNetwork()
     a.readNetworkArchitecture("testfiles/network.txt")
-#    a.readNetworkWeights("testfiles/weights.txt")
-    print(a.computeCost([[0.6969, 0.666]], [[1.0]]))
+    a.readNetworkWeights("testfiles/weights.txt")
+#    a.computeCost([[0.6969, 0.666]], [[1.0]])
+    a.computeDeltas([0.6969, 0.666], [1.0])
