@@ -44,6 +44,13 @@ class NeuralNetwork():
             self.gradient.append(np.empty((self.architecture[i+1],
                                           self.architecture[i]+1)))
 
+        self.architecture = np.asarray(self.architecture)
+        self.activation = np.asarray(self.activation)
+        self.weights = np.asarray(self.weights)
+        self.delta = np.asarray(self.delta)
+        self.gradient = np.asarray(self.gradient)
+
+
     def readNetworkWeights(self, fileName):
         with open(fileName, "r") as openFile:
             readFile = openFile.read().splitlines()
@@ -109,6 +116,19 @@ class NeuralNetwork():
         print('Gradient:')
         print(self.gradient)
 
+    def gradientRegularization(self, n):
+        regularization = np.asarray(self.regularizationFactor * self.weights)
+
+        for layer in regularization:
+            layer[:,0] = 0
+
+        print('Regularization:')
+        print(regularization)
+
+        self.gradient = (1.0 / n) * (self.gradient + regularization)
+        print('Gradient after Regularization:')
+        print(self.gradient)
+
     # Batch
     def computeCost(self, x, y):
         assert len(x) == len(y), "Error: number of entries and labels don't match"
@@ -143,3 +163,4 @@ if __name__ == "__main__":
 #    a.computeDeltas([0.6969, 0.666], [1.0])
     a.setGradientZero()
     a.updateGradient([0.6969, 0.666], [1.0])
+    a.gradientRegularization(1)
