@@ -1,6 +1,9 @@
 import numpy as np
 
 
+def sigmoid(x):
+    return 1/(1 + np.exp(-x))
+
 class NeuralNetwork():
     def __init__(self):
         self.regularizationFactor = -1.0
@@ -26,8 +29,10 @@ class NeuralNetwork():
 
         for i in range(len(self.architecture)-1):
             # Destination, origin; self.architecture[i]+1 to account for bias
-            self.weights.append(np.random.rand(self.architecture[i+1],
-                                               self.architecture[i]+1))
+            layer = np.random.rand(self.architecture[i+1],
+                                               self.architecture[i]+1)
+            layer = (layer - 0.5) * 2
+            self.weights.append(layer)
 
     def readNetworkWeights(self, fileName):
         with open(fileName, "r") as openFile:
@@ -58,6 +63,7 @@ class NeuralNetwork():
         self.activation[0][1:] = input
         for i in range(1, len(self.activation)):
             self.activation[i][1:] = (self.activation[i-1] * self.weights[i-1]).sum(1)
+            self.activation[i][1:] = sigmoid(self.activation[i][1:])
 
     def getPredictions(self):
         return self.activation[len(self.activation)-1][1:]
@@ -65,6 +71,6 @@ class NeuralNetwork():
 if __name__ == "__main__":
     a = NeuralNetwork()
     a.readNetworkArchitecture("testfiles/network.txt")
-    a.readNetworkWeights("testfiles/weights.txt")
+#    a.readNetworkWeights("testfiles/weights.txt")
     a.computeActivations([0.6969, 0.666])
     print(a.getPredictions())
