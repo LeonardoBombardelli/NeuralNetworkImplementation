@@ -65,6 +65,28 @@ class NeuralNetwork():
             self.activation[i][1:] = (self.activation[i-1] * self.weights[i-1]).sum(1)
             self.activation[i][1:] = sigmoid(self.activation[i][1:])
 
+    def computeCost(self, x, y):
+        assert len(x) == len(y), "Error: number of entries and labels don't match"
+
+        j = 0.0
+        for i in range(len(x)):
+            self.computeActivations(x[i])
+            out = self.getPredictions();
+            print('Prediction: ', out)
+            print('Expected: ', y[i])
+
+            j += ([-1*v for v in y[i]] * np.log(out) - (np.ones(len(y[i])) - y[i]) * np.log(1 - out)).sum()
+        j /= len(x)
+        print('J: ', j)
+
+        s = 0.0
+        for w in self.weights:
+            s += np.square(w[1:]).sum()
+        s *= (self.regularizationFactor / (2*len(x)))
+        print('S: ', s)
+
+        return j + s
+
     def getPredictions(self):
         return self.activation[len(self.activation)-1][1:]
 
@@ -72,5 +94,4 @@ if __name__ == "__main__":
     a = NeuralNetwork()
     a.readNetworkArchitecture("testfiles/network.txt")
 #    a.readNetworkWeights("testfiles/weights.txt")
-    a.computeActivations([0.6969, 0.666])
-    print(a.getPredictions())
+    print(a.computeCost([[0.6969, 0.666]], [[1.0]]))
