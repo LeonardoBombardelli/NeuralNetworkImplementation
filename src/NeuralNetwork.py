@@ -16,6 +16,8 @@ class NeuralNetwork():
         self.activation = []
         # Delta for each neuron of each layer
         self.delta = []
+        # Gradient for each weight of each layer
+        self.gradient = []
 
     def readNetworkArchitecture(self, fileName):
         with open(fileName, "r") as openFile:
@@ -36,9 +38,11 @@ class NeuralNetwork():
         for i in range(len(self.architecture)-1):
             # Destination, origin; self.architecture[i]+1 to account for bias
             layer = np.random.rand(self.architecture[i+1],
-                                               self.architecture[i]+1)
+                                   self.architecture[i]+1)
             layer = (layer - 0.5) * 2
             self.weights.append(layer)
+            self.gradient.append(np.empty((self.architecture[i+1],
+                                          self.architecture[i]+1)))
 
     def readNetworkWeights(self, fileName):
         with open(fileName, "r") as openFile:
@@ -83,12 +87,27 @@ class NeuralNetwork():
             self.delta[i] = (self.delta[i+1] * self.weights[i+1][:,1:]) * \
                             self.activation[i+1][1:] * \
                             (np.ones(len(self.activation[i+1][1:])) - self.activation[i+1][1:])
+
+    def setGradientZero(self):
+        for g in self.gradient:
+            g.fill(0.0)
+
+    # Single element
+    def updateGradient(self, x, y):
+        self.computeDeltas(x, y)
+
+        for i in range(len(self.gradient)):
+            # Delta already starts in the first hidden layer
+            self.gradient[i] += self.delta[i] * self.activation[i]
+
         print('Weights:')
         print(self.weights)
         print('Activation:')
         print(self.activation)
         print('Delta:')
         print(self.delta)
+        print('Gradient:')
+        print(self.gradient)
 
     # Batch
     def computeCost(self, x, y):
@@ -120,5 +139,7 @@ if __name__ == "__main__":
     a = NeuralNetwork()
     a.readNetworkArchitecture("testfiles/network.txt")
     a.readNetworkWeights("testfiles/weights.txt")
-#    a.computeCost([[0.6969, 0.666]], [[1.0]])
-    a.computeDeltas([0.6969, 0.666], [1.0])
+    a.computeCost([[0.6969, 0.666]], [[1.0]])
+#    a.computeDeltas([0.6969, 0.666], [1.0])
+    a.setGradientZero()
+    a.updateGradient([0.6969, 0.666], [1.0])
