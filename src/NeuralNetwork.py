@@ -57,10 +57,7 @@ class NeuralNetwork():
 
         self.activation[0][1:] = input
         for i in range(1, len(self.activation)):
-            for j in range(1, len(self.activation[i])):
-                # i-1 as we want the previous layer
-                # j-1 as we want the weight from the bias (self.weights)
-                self.activation[i][j] = (self.activation[i-1] * self.weights[i-1][j-1]).sum()
+            self.activation[i][1:] = (self.activation[i-1] * self.weights[i-1]).sum(1)
 
     def getPredictions(self):
         return self.activation[len(self.activation)-1][1:]
