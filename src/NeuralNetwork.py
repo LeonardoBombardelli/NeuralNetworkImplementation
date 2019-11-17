@@ -47,11 +47,11 @@ class NeuralNetwork():
             self.gradient.append(np.empty((self.architecture[i+1],
                                           self.architecture[i]+1)))
 
-        # self.architecture = np.asarray(self.architecture)
-        # self.activation = np.asarray(self.activation)
-        # self.weights = np.asarray(self.weights)
-        # self.delta = np.asarray(self.delta)
-        # self.gradient = np.asarray(self.gradient)
+        self.architecture = np.asarray(self.architecture)
+        self.activation = np.asarray(self.activation)
+        self.weights = np.asarray(self.weights)
+        self.delta = np.asarray(self.delta)
+        self.gradient = np.asarray(self.gradient)
 
 
     def readNetworkWeights(self, fileName):
@@ -119,7 +119,8 @@ class NeuralNetwork():
 
         for i in range(len(self.gradient)):
             # Delta already starts in the first hidden layer
-            self.gradient[i] += self.delta[i] * self.activation[i]
+            for j in range(len(self.delta[i])):
+                self.gradient[i][j] += self.delta[i][j] * self.activation[i]
 
     # n is the number of training instances
     def gradientRegularization(self, n):
@@ -201,8 +202,6 @@ class NeuralNetwork():
                     # print(i, j)
                     nGradient[l][i][j] = J / (2 * eps)
 
-        print('DIFF:')
-        print(diff)
         print('Numerical gradient:')
         print(nGradient)
 
@@ -233,14 +232,14 @@ class NeuralNetwork():
             self.updateTheta()
 
 if __name__ == "__main__":
-#    x = [[0.6969, 0.666]]; y = [[1.0]]
-    x = [[1.5]]; y = [[1.0]]
+    x = [[0.6969, 0.666]]; y = [[1.0]]
+#    x = [[1.5]]; y = [[1.0]]
 
     a = NeuralNetwork(0.1)
-    a.readNetworkArchitecture("testfiles/network_numerical_test.txt")
-    a.readNetworkWeights("testfiles/weights_numerical_test.txt")
+    a.readNetworkArchitecture("testfiles/network.txt")
+#    a.readNetworkWeights("testfiles/weights.txt")
     a.numericalCheck(x, y)
 
-#    print('Before training....', a.predict([0.6969, 0.666]), '\n')
-#    a.train(x, y, 1)
-#    print('\n\nAfter training....', a.predict([0.6969, 0.666]))
+#    print('Before training....', a.predict(x[0]), '\n')
+#    a.train(x, y, 10)
+#    print('\nAfter training....', a.predict(x[0]))
