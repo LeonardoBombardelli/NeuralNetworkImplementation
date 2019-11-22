@@ -5,9 +5,9 @@ def sigmoid(x):
     return 1/(1 + np.exp(-x))
 
 class NeuralNetwork():
-    def __init__(self, alpha):
+    def __init__(self, alpha, verbose = False):
         # Set to false for now
-        self.verbose = False
+        self.verbose = verbose
         self.alpha = alpha
         self.regularizationFactor = -1.0
         # Amount of neurons per layer
@@ -25,7 +25,9 @@ class NeuralNetwork():
     def readNetworkArchitecture(self, fileName):
         with open(fileName, "r") as openFile:
             readFile = openFile.read().splitlines()
+            
         self.regularizationFactor = float(readFile[0])
+        
         self.architecture = [int(x) for x in readFile[1:]]
 
         # First layer is set to input, when computing activation
@@ -52,6 +54,16 @@ class NeuralNetwork():
         self.weights = np.asarray(self.weights)
         self.delta = np.asarray(self.delta)
         self.gradient = np.asarray(self.gradient)
+        
+        if(self.verbose):
+            self.printArchitecture()
+        
+    def printArchitecture(self):
+        print("Parametro de regularizacao lambda: ", self.regularizationFactor)
+        print("Rede com seguinte estrutura de neuronios por camada: ")
+        print(self.architecture)
+        print()
+        
 
 
     def readNetworkWeights(self, fileName):
@@ -75,6 +87,20 @@ class NeuralNetwork():
 
                 # Layer i, node j (all sources)
                 self.weights[i][j] = actualWeights
+        
+        if(self.verbose):
+            self.printWeights()
+        
+    def printWeights(self):
+        for layerNumber in range(len(self.architecture) - 1):
+            print("Theta" + str(layerNumber) + " inicial:")
+            strToPrint = ""
+            for column in self.weights[layerNumber]:
+                for line in column:
+                    strToPrint += str(line) + "\t"
+                strToPrint += "\n"
+            
+            print(strToPrint)
 
     # Single element
     def computeActivations(self, input, eps=None):
@@ -142,7 +168,7 @@ class NeuralNetwork():
             print(self.gradient)
 
     def updateTheta(self):
-        for i in range(len(self.weights)):
+        for _ in range(len(self.weights)):
             self.weights -= self.alpha * self.gradient
 
     # Batch
@@ -152,7 +178,7 @@ class NeuralNetwork():
         j = 0.0
         for i in range(len(x)):
             self.computeActivations(x[i], eps)
-            out = self.getPredictions();
+            out = self.getPredictions()
 
             j += ([-1*v for v in y[i]] * np.log(out) - (np.ones(len(y[i])) - y[i]) * np.log(1 - out)).sum()
         j /= len(x)
@@ -232,12 +258,12 @@ class NeuralNetwork():
             self.updateTheta()
 
 if __name__ == "__main__":
-    x = [[0.6969, 0.666]]; y = [[1.0]]
-#    x = [[1.5]]; y = [[1.0]]
+#    x = [[0.6969, 0.666]]; y = [[1.0]]
+    x = [[1.5]]; y = [[1.0]]
 
-    a = NeuralNetwork(0.1)
+    a = NeuralNetwork(0.1, verbose=True)
     a.readNetworkArchitecture("testfiles/network.txt")
-#    a.readNetworkWeights("testfiles/weights.txt")
+    a.readNetworkWeights("testfiles/initial_weights.txt")
     a.numericalCheck(x, y)
 
 #    print('Before training....', a.predict(x[0]), '\n')
