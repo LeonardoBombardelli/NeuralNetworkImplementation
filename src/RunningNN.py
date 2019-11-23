@@ -8,7 +8,15 @@ if __name__ == "__main__":
     print(x)
     print(y)
 
+    ys = []
+    for i in y.tolist():
+        yl = [0] * 3
+        yl[i-1] = 1
+        print(yl)
+        ys.append(yl)
+
     nn = NeuralNetwork(0.1)
     nn.readNetworkArchitecture("testfiles/wineNetwork.txt")
-    nn.train(x.values.tolist(), [[i] for i in y.tolist()], 5)
+    nn.numericalCheck(x.values.tolist(), ys)
+    # nn.train(x.values.tolist(), [[i] for i in y.tolist()], 5)
     print("Nice")

@@ -25,9 +25,9 @@ class NeuralNetwork():
     def readNetworkArchitecture(self, fileName):
         with open(fileName, "r") as openFile:
             readFile = openFile.read().splitlines()
-            
+
         self.regularizationFactor = float(readFile[0])
-        
+
         self.architecture = [int(x) for x in readFile[1:]]
 
         # First layer is set to input, when computing activation
@@ -54,16 +54,16 @@ class NeuralNetwork():
         self.weights = np.asarray(self.weights)
         self.delta = np.asarray(self.delta)
         self.gradient = np.asarray(self.gradient)
-        
+
         if(self.verbose):
             self.printArchitecture()
-        
+
     def printArchitecture(self):
         print("Parametro de regularizacao lambda: ", self.regularizationFactor)
         print("Rede com seguinte estrutura de neuronios por camada: ")
         print(self.architecture)
         print()
-        
+
 
 
     def readNetworkWeights(self, fileName):
@@ -87,10 +87,10 @@ class NeuralNetwork():
 
                 # Layer i, node j (all sources)
                 self.weights[i][j] = actualWeights
-        
+
         if(self.verbose):
             self.printWeights()
-        
+
     def printWeights(self):
         for layerNumber in range(len(self.architecture) - 1):
             print("Theta" + str(layerNumber) + " inicial:")
@@ -99,7 +99,7 @@ class NeuralNetwork():
                 for line in column:
                     strToPrint += str(line) + "\t"
                 strToPrint += "\n"
-            
+
             print(strToPrint)
 
     # Single element
@@ -123,7 +123,7 @@ class NeuralNetwork():
         # Reverse loop, from last hidden layer to the first one
         for i in range(len(self.delta)-2, -1, -1):
             # Skips bias activation
-            self.delta[i] = ((self.delta[i+1] * self.weights[i+1][:,1:]) * \
+            self.delta[i] = ((self.weights[i+1][:,1:].transpose() * self.delta[i+1]).transpose() * \
                             self.activation[i+1][1:] * \
                             (np.ones(len(self.activation[i+1][1:])) - self.activation[i+1][1:]))[0]
 

@@ -62,7 +62,7 @@ def getSeparator(path: str):
 
 def readDataWine(datawinePath: str):
     df = pd.read_csv(datawinePath)
-    
+
     dfTarget = df["target"]
     df = (df-df.min())/(df.max()-df.min())
     df["target"] = dfTarget
@@ -71,6 +71,5 @@ def readDataWine(datawinePath: str):
 
     return(x, dfTarget)
 
-if __name__ == "__main__":
-    print(generate_kfolds(readDataWine("datasets/wine.data"), "target", 8))
-
+# if __name__ == "__main__":
+#     print(generate_kfolds(readDataWine("datasets/wine.data"), "target", 8))
