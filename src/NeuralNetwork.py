@@ -40,20 +40,27 @@ class NeuralNetwork():
             if i != 0:
                 self.delta.append(np.zeros(neurons))
 
+        weights = []
+        gradient = []
         for i in range(len(self.architecture)-1):
             # Destination, origin; self.architecture[i]+1 to account for bias
             layer = np.random.rand(self.architecture[i+1],
                                    self.architecture[i]+1)
             layer = (layer - 0.5) * 2
-            self.weights.append(layer)
-            self.gradient.append(np.empty((self.architecture[i+1],
-                                          self.architecture[i]+1)))
+            weights.append(layer)
+            gradient.append(np.empty((self.architecture[i+1],
+                                      self.architecture[i]+1)))
 
         self.architecture = np.asarray(self.architecture)
         self.activation = np.asarray(self.activation)
-        self.weights = np.asarray(self.weights)
         self.delta = np.asarray(self.delta)
-        self.gradient = np.asarray(self.gradient)
+
+        self.weights = np.empty(len(self.architecture)-1, dtype=object)
+        self.gradient = np.empty(len(self.architecture)-1, dtype=object)
+
+        for i in range(len(self.architecture)-1):
+            self.weights[i] = weights[i]
+            self.gradient[i] = gradient[i]
 
         if(self.verbose):
             self.printArchitecture()
@@ -259,11 +266,11 @@ class NeuralNetwork():
 
 if __name__ == "__main__":
 #    x = [[0.6969, 0.666]]; y = [[1.0]]
-    x = [[1.5]]; y = [[1.0]]
+    x = [[1.5]]; y = [[1.0, 0.0]]
 
-    a = NeuralNetwork(0.1, verbose=True)
-    a.readNetworkArchitecture("testfiles/network.txt")
-    a.readNetworkWeights("testfiles/initial_weights.txt")
+    a = NeuralNetwork(0.1)
+    a.readNetworkArchitecture("testfiles/minimal_error.txt")
+#    a.readNetworkWeights("testfiles/initial_weights.txt")
     a.numericalCheck(x, y)
 
 #    print('Before training....', a.predict(x[0]), '\n')
