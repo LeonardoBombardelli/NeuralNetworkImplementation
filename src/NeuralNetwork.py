@@ -43,20 +43,27 @@ class NeuralNetwork():
             if i != 0:
                 self.delta.append(np.zeros(neurons))
 
+        weights = []
+        gradient = []
         for i in range(len(self.architecture)-1):
             # Destination, origin; self.architecture[i]+1 to account for bias
             layer = np.random.rand(self.architecture[i+1],
                                    self.architecture[i]+1)
             layer = (layer - 0.5) * 2
-            self.weights.append(layer)
-            self.gradient.append(np.empty((self.architecture[i+1],
-                                          self.architecture[i]+1)))
+            weights.append(layer)
+            gradient.append(np.empty((self.architecture[i+1],
+                                      self.architecture[i]+1)))
 
         self.architecture = np.asarray(self.architecture)
         self.activation = np.asarray(self.activation)
-        self.weights = np.asarray(self.weights)
         self.delta = np.asarray(self.delta)
-        self.gradient = np.asarray(self.gradient)
+
+        self.weights = np.empty(len(self.architecture)-1, dtype=object)
+        self.gradient = np.empty(len(self.architecture)-1, dtype=object)
+
+        for i in range(len(self.architecture)-1):
+            self.weights[i] = weights[i]
+            self.gradient[i] = gradient[i]
 
         if(self.verbose):
             self.printArchitecture()
@@ -128,7 +135,7 @@ class NeuralNetwork():
             # Skips bias activation
             self.delta[i] = ((self.weights[i+1][:,1:].transpose() * self.delta[i+1]).transpose() * \
                             self.activation[i+1][1:] * \
-                            (np.ones(len(self.activation[i+1][1:])) - self.activation[i+1][1:]))[0]
+                            (np.ones(len(self.activation[i+1][1:])) - self.activation[i+1][1:])).sum(0)
 
     def setGradientZero(self):
         for g in self.gradient:
@@ -140,11 +147,14 @@ class NeuralNetwork():
 
         if self.verbose:
             print('Weights:')
-            print(self.weights)
+            for l in self.weights:
+                print(l)
             print('Activation:')
-            print(self.activation)
+            for l in self.activation:
+                print(l)
             print('Delta:')
-            print(self.delta)
+            for l in self.delta:
+                print(l)
 
         for i in range(len(self.gradient)):
             # Delta already starts in the first hidden layer
@@ -219,7 +229,8 @@ class NeuralNetwork():
         for j in range(len(x)):
             self.updateGradient(x[j], y[j])
         print('Computed gradient:')
-        print(self.gradient)
+        for l in self.gradient:
+            print(l)
 
         for l in range(len(self.gradient)):
             for i in range(self.architecture[l+1]):
@@ -237,7 +248,8 @@ class NeuralNetwork():
                     nGradient[l][i][j] = J / (2 * eps)
 
         print('Numerical gradient:')
-        print(nGradient)
+        for l in nGradient:
+            print(l)
 
     def predict(self, x):
         self.computeActivations(x)
@@ -288,9 +300,11 @@ if __name__ == "__main__":
 #    x = [[0.6969, 0.666]]; y = [[1.0]]
     x = [[1.5]]; y = [[1.0]]
 
-    a = NeuralNetwork(0.1, verbose=True)
-    a.readNetworkArchitecture("testfiles/network.txt")
-    a.readNetworkWeights("testfiles/initial_weights.txt")
+    a = NeuralNetwork(0.1)
+#    a.readNetworkArchitecture("testfiles/network_numerical_test.txt")
+#    a.readNetworkWeights("testfiles/weights_numerical_test.txt")
+    a.readNetworkArchitecture("testfiles/minimal_error.txt")
+    a.readNetworkWeights("testfiles/minimal_error_weights.txt")
     a.numericalCheck(x, y)
 
 #    print('Before training....', a.predict(x[0]), '\n')
