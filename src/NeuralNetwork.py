@@ -1,5 +1,6 @@
 import numpy as np
-from Utils import DecodeOneHot, calculateF1
+import pandas as pd
+from Utils import DecodeOneHot, calculateF1, generate_kfolds, OneHotEncoding
 
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
@@ -257,12 +258,28 @@ class NeuralNetwork():
         self.computeActivations(x)
         return self.getPredictions()
 
-    def train(self, x, y, epochs, saveResults = "", saveResultsEveryInterval = -1, batchSize = 0):
+    def train(self, df, nClass, epochs, saveResults = "", saveResultsEveryInterval = -1, batchSize = 0):
+        folds = generate_kfolds(df, "target", 8)
+
+        foldTrain = pd.concat(folds[1:])
+
+        y = OneHotEncoding(foldTrain["target"], nClass)
+        x = foldTrain.drop(["target"], axis=1)
+        x = x.values.tolist()
+
+        foldEval = folds[0]
+
+        yEval = OneHotEncoding(foldEval["target"], nClass)
+        xEval = foldEval.drop(["target"], axis=1)
+        xEval = xEval.values.tolist()
+
         if batchSize <= 0:
             batchSize = len(x)
 
         batchBegin = 0
+
         print(batchSize, len(x))
+
         for i in range(epochs):
             print('EPOCH %d' % i)
             print('Current error: ', self.computeCost(x, y))
@@ -281,7 +298,14 @@ class NeuralNetwork():
                     with open(saveResults, "a+") as openFile:
                         openFile.write(str(i) + ", " + \
                             str(self.getAccuracy(y)) + ", " + str(self.lastjCost) + ", " + str(self.getF1Measure(y)) +"\n")
-                            #+ str(self.getF1Measure(y)) + ", "
+                    
+                    self.computeCost(xEval, yEval)
+                    with open(saveResults.split(".")[0] + "Eval.txt", "a+") as openFile:
+                        openFile.write(str(i) + ", " + \
+                            str(self.getAccuracy(yEval)) + ", " + str(self.lastjCost) + ", " + str(self.getF1Measure(yEval)) +"\n")
+                    
+
+                        
 
             if self.verbose:
                 print('Weights:')
