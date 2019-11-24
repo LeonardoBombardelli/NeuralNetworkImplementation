@@ -258,20 +258,7 @@ class NeuralNetwork():
         self.computeActivations(x)
         return self.getPredictions()
 
-    def train(self, df, nClass, epochs, saveResults = "", saveResultsEveryInterval = -1, batchSize = 0):
-        folds = generate_kfolds(df, "target", 8)
-
-        foldTrain = pd.concat(folds[1:])
-
-        y = OneHotEncoding(foldTrain["target"], nClass)
-        x = foldTrain.drop(["target"], axis=1)
-        x = x.values.tolist()
-
-        foldEval = folds[0]
-
-        yEval = OneHotEncoding(foldEval["target"], nClass)
-        xEval = foldEval.drop(["target"], axis=1)
-        xEval = xEval.values.tolist()
+    def train(self, x, y, xEval, yEval, epochs, saveResults = "", saveResultsEveryInterval = -1, batchSize = 0):
 
         if batchSize <= 0:
             batchSize = len(x)

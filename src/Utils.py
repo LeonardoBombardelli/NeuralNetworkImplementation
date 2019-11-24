@@ -122,5 +122,25 @@ def DecodeOneHot(decodeList):
     else:
         return(np.argmax(decodeList))
 
+def GenerateTrainAndEval(folds, nClass, kIndex):
+        foldTrain = []
+        for i in range(8):
+            if i != kIndex:
+                foldTrain.append(folds[i])
+
+        foldTrain = pd.concat(folds[1:])
+
+        y = OneHotEncoding(foldTrain["target"], nClass)
+        x = foldTrain.drop(["target"], axis=1)
+        x = x.values.tolist()
+
+        foldEval = folds[kIndex]
+
+        yEval = OneHotEncoding(foldEval["target"], nClass)
+        xEval = foldEval.drop(["target"], axis=1)
+        xEval = xEval.values.tolist()
+
+        return(x, y, xEval, yEval)
+
 # if __name__ == "__main__":
 #     print(generate_kfolds(readDataWine("datasets/wine.data"), "target", 8))
