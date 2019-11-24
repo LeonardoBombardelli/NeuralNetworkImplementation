@@ -295,6 +295,7 @@ class NeuralNetwork():
         return(
             sumOfRights / len(y)
         )
+    
 
 if __name__ == "__main__":
 #    x = [[0.6969, 0.666]]; y = [[1.0]]

@@ -73,6 +73,38 @@ def readDataWine(datawinePath: str):
 
     return(x, dfTarget)
 
+def readDataDiabetes(datadiabetesPath):
+    df = pd.read_csv(datadiabetesPath, sep="\t")
+
+    dfTarget = df["target"]
+    df = (df-df.min())/(df.max()-df.min())
+    df["target"] = dfTarget
+
+    x = df.drop(["target"], axis=1)
+
+    dfTarget = OneHotEncoding(dfTarget, 2)
+
+    return(x, dfTarget)
+
+def readDataIonosphere(dataionospherePath):
+    df = pd.read_csv(dataionospherePath)
+
+    cleanup = {
+        '33': {'b': 1, 'g': 0}
+    }
+
+    df.replace(cleanup, inplace=True)
+
+    dfTarget = df["target"]
+    df = (df-df.min())/(df.max()-df.min())
+    df["target"] = dfTarget
+
+    x = df.drop(["target", "0"], axis=1)
+
+    dfTarget = OneHotEncoding(dfTarget, 2)
+
+    return(x, dfTarget)
+
 def OneHotEncoding(listToEncode, numberOfClasses: int):
     ys = []
     for i in listToEncode.tolist():
