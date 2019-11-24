@@ -255,22 +255,32 @@ class NeuralNetwork():
         self.computeActivations(x)
         return self.getPredictions()
 
-    def train(self, x, y, epochs, saveResults = "", saveResultsEveryInterval = -1):
+    def train(self, x, y, epochs, saveResults = "", saveResultsEveryInterval = -1, batchSize = 0):
+        if batchSize <= 0:
+            batchSize = len(x)
+
+        batchBegin = 0
+        print(batchSize, len(x))
         for i in range(epochs):
             print('EPOCH %d' % i)
             print('Current error: ', self.computeCost(x, y))
 
             self.setGradientZero()
-            for j in range(len(x)):
-                self.updateGradient(x[j], y[j])
+            print(batchBegin, batchBegin + batchSize)
+            for j in range(batchBegin, batchBegin + batchSize):
+                index = j % len(x)
+                self.updateGradient(x[index], y[index])
             self.gradientRegularization(len(x))
+
+            batchBegin += batchSize
+            batchBegin = batchBegin % len(x)
 
             if(saveResultsEveryInterval > 0):
                 if(i % saveResultsEveryInterval == 0):
                     with open(saveResults, "a+") as openFile:
                         openFile.write(str(i) + ", " + \
                             str(self.getAccuracy(y)) + ", " + str(self.lastjCost) +"\n")
-                            #+ str(self.getF1Measure(y)) + ", " 
+                            #+ str(self.getF1Measure(y)) + ", "
 
             if self.verbose:
                 print('Weights:')
@@ -291,11 +301,11 @@ class NeuralNetwork():
         for i in range(len(y)):
             if(DecodeOneHot(y[i]) == DecodeOneHot(self.lastOut[i])):
                 sumOfRights += 1
-        
+
         return(
             sumOfRights / len(y)
         )
-    
+
 
 if __name__ == "__main__":
 #    x = [[0.6969, 0.666]]; y = [[1.0]]
