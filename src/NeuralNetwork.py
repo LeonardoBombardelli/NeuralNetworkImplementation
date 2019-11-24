@@ -132,7 +132,7 @@ class NeuralNetwork():
             # Skips bias activation
             self.delta[i] = ((self.weights[i+1][:,1:].transpose() * self.delta[i+1]).transpose() * \
                             self.activation[i+1][1:] * \
-                            (np.ones(len(self.activation[i+1][1:])) - self.activation[i+1][1:]))[0]
+                            (np.ones(len(self.activation[i+1][1:])) - self.activation[i+1][1:])).sum(0)
 
     def setGradientZero(self):
         for g in self.gradient:
@@ -144,11 +144,14 @@ class NeuralNetwork():
 
         if self.verbose:
             print('Weights:')
-            print(self.weights)
+            for l in self.weights:
+                print(l)
             print('Activation:')
-            print(self.activation)
+            for l in self.activation:
+                print(l)
             print('Delta:')
-            print(self.delta)
+            for l in self.delta:
+                print(l)
 
         for i in range(len(self.gradient)):
             # Delta already starts in the first hidden layer
@@ -218,7 +221,8 @@ class NeuralNetwork():
         for j in range(len(x)):
             self.updateGradient(x[j], y[j])
         print('Computed gradient:')
-        print(self.gradient)
+        for l in self.gradient:
+            print(l)
 
         for l in range(len(self.gradient)):
             for i in range(self.architecture[l+1]):
@@ -236,7 +240,8 @@ class NeuralNetwork():
                     nGradient[l][i][j] = J / (2 * eps)
 
         print('Numerical gradient:')
-        print(nGradient)
+        for l in nGradient:
+            print(l)
 
     def predict(self, x):
         self.computeActivations(x)
@@ -266,11 +271,13 @@ class NeuralNetwork():
 
 if __name__ == "__main__":
 #    x = [[0.6969, 0.666]]; y = [[1.0]]
-    x = [[1.5]]; y = [[1.0, 0.0]]
+    x = [[1.5]]; y = [[1.0]]
 
     a = NeuralNetwork(0.1)
+#    a.readNetworkArchitecture("testfiles/network_numerical_test.txt")
+#    a.readNetworkWeights("testfiles/weights_numerical_test.txt")
     a.readNetworkArchitecture("testfiles/minimal_error.txt")
-#    a.readNetworkWeights("testfiles/initial_weights.txt")
+    a.readNetworkWeights("testfiles/minimal_error_weights.txt")
     a.numericalCheck(x, y)
 
 #    print('Before training....', a.predict(x[0]), '\n')
