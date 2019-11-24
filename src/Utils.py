@@ -69,6 +69,8 @@ def readDataWine(datawinePath: str):
 
     x = df.drop(["target"], axis=1)
 
+    dfTarget = OneHotEncoding(dfTarget, 3)
+
     return(x, dfTarget)
 
 def OneHotEncoding(listToEncode, numberOfClasses: int):
@@ -78,6 +80,12 @@ def OneHotEncoding(listToEncode, numberOfClasses: int):
         yl[i-1] = 1
         ys.append(yl)
     return(ys)
+
+def DecodeOneHot(decodeList):
+    if(isinstance(decodeList, list)):
+        return(decodeList.index(max(decodeList)))
+    else:
+        return(np.argmax(decodeList))
 
 # if __name__ == "__main__":
 #     print(generate_kfolds(readDataWine("datasets/wine.data"), "target", 8))

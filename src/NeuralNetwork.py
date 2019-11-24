@@ -1,5 +1,5 @@
 import numpy as np
-
+from Utils import DecodeOneHot
 
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
@@ -21,6 +21,9 @@ class NeuralNetwork():
         self.delta = []
         # Gradient for each weight of each layer
         self.gradient = []
+
+        self.lastjCost = None
+        self.lastOut = None
 
     def readNetworkArchitecture(self, fileName):
         with open(fileName, "r") as openFile:
@@ -175,10 +178,13 @@ class NeuralNetwork():
     def computeCost(self, x, y, eps=None, reg=True):
         assert len(x) == len(y), "Error: number of entries and labels don't match"
 
+        self.lastOut = []
+
         j = 0.0
         for i in range(len(x)):
             self.computeActivations(x[i], eps)
             out = self.getPredictions()
+            self.lastOut.append(out)
 
             j += ([-1*v for v in y[i]] * np.log(out) - (np.ones(len(y[i])) - y[i]) * np.log(1 - out)).sum()
         j /= len(x)
@@ -194,6 +200,8 @@ class NeuralNetwork():
         if self.verbose:
             print('J: ', j)
             print('S: ', s)
+
+        self.lastjCost = j
 
         return j + s
 
@@ -235,7 +243,7 @@ class NeuralNetwork():
         self.computeActivations(x)
         return self.getPredictions()
 
-    def train(self, x, y, epochs):
+    def train(self, x, y, epochs, saveResults = "", saveResultsEveryInterval = -1):
         for i in range(epochs):
             print('EPOCH %d' % i)
             print('Current error: ', self.computeCost(x, y))
@@ -244,6 +252,13 @@ class NeuralNetwork():
             for j in range(len(x)):
                 self.updateGradient(x[j], y[j])
             self.gradientRegularization(len(x))
+
+            if(saveResultsEveryInterval > 0):
+                if(i % saveResultsEveryInterval == 0):
+                    with open(saveResults, "a+") as openFile:
+                        openFile.write(str(i) + ", " + \
+                            str(self.getAccuracy(y)) + ", " + str(self.lastjCost) +"\n")
+                            #+ str(self.getF1Measure(y)) + ", " 
 
             if self.verbose:
                 print('Weights:')
@@ -256,6 +271,18 @@ class NeuralNetwork():
                 print(self.gradient)
 
             self.updateTheta()
+
+    def getAccuracy(self, y):
+        assert len(y) == len(self.lastOut)
+
+        sumOfRights = 0
+        for i in range(len(y)):
+            if(DecodeOneHot(y[i]) == DecodeOneHot(self.lastOut[i])):
+                sumOfRights += 1
+        
+        return(
+            sumOfRights / len(y)
+        )
 
 if __name__ == "__main__":
 #    x = [[0.6969, 0.666]]; y = [[1.0]]
