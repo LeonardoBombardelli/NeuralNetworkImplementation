@@ -1,5 +1,5 @@
 import numpy as np
-from Utils import DecodeOneHot
+from Utils import DecodeOneHot, calculateF1
 
 def sigmoid(x):
     return 1/(1 + np.exp(-x))
@@ -24,6 +24,8 @@ class NeuralNetwork():
 
         self.lastjCost = None
         self.lastOut = None
+
+        self.f1Results = {}
 
     def readNetworkArchitecture(self, fileName):
         with open(fileName, "r") as openFile:
@@ -266,7 +268,6 @@ class NeuralNetwork():
             print('Current error: ', self.computeCost(x, y))
 
             self.setGradientZero()
-            print(batchBegin, batchBegin + batchSize)
             for j in range(batchBegin, batchBegin + batchSize):
                 index = j % len(x)
                 self.updateGradient(x[index], y[index])
@@ -279,7 +280,7 @@ class NeuralNetwork():
                 if(i % saveResultsEveryInterval == 0):
                     with open(saveResults, "a+") as openFile:
                         openFile.write(str(i) + ", " + \
-                            str(self.getAccuracy(y)) + ", " + str(self.lastjCost) +"\n")
+                            str(self.getAccuracy(y)) + ", " + str(self.lastjCost) + ", " + str(self.getF1Measure(y)) +"\n")
                             #+ str(self.getF1Measure(y)) + ", "
 
             if self.verbose:
@@ -306,6 +307,35 @@ class NeuralNetwork():
             sumOfRights / len(y)
         )
 
+    def getF1Measure(self, y):
+        assert len(y) == len(self.lastOut)
+
+        self.f1Results.clear(); self.f1Results = {}
+        for i in range(len(y)):
+            yi = DecodeOneHot(y[i])
+            lo = DecodeOneHot(self.lastOut[i])
+            if yi not in self.f1Results:
+                self.f1Results[yi] = {}
+                self.f1Results[yi]['eval'] = False
+                self.f1Results[yi]['VP'] = 0
+                self.f1Results[yi]['FP'] = 0
+                self.f1Results[yi]['FN'] = 0
+            if lo not in self.f1Results:
+                self.f1Results[lo] = {}
+                self.f1Results[lo]['VP'] = 0
+                self.f1Results[lo]['FP'] = 0
+                self.f1Results[lo]['FN'] = 0
+
+            self.f1Results[yi]['eval'] = True
+            self.f1Results[lo]['eval'] = True
+
+            if yi == lo:
+                self.f1Results[lo]['VP'] += 1
+            else:
+                self.f1Results[lo]['FP'] += 1
+                self.f1Results[yi]['FN'] += 1
+
+        return calculateF1(self.f1Results)
 
 if __name__ == "__main__":
 #    x = [[0.6969, 0.666]]; y = [[1.0]]
