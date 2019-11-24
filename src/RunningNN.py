@@ -10,5 +10,5 @@ if __name__ == "__main__":
     nn = NeuralNetwork(0.1)
     nn.readNetworkArchitecture("testfiles/wineNetwork.txt")
     # nn.numericalCheck(x.values.tolist(), y)
-    nn.train(x.values.tolist(), y, 5000, saveResults = "results/testresults.txt", saveResultsEveryInterval = 1)
+    nn.train(x.values.tolist(), y, 5000, saveResults = "results/testresults.txt", saveResultsEveryInterval = 5)
     print("Nice")

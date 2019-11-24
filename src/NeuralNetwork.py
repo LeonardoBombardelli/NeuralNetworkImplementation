@@ -194,7 +194,7 @@ class NeuralNetwork():
         for i in range(len(x)):
             self.computeActivations(x[i], eps)
             out = self.getPredictions()
-            self.lastOut.append(out)
+            self.lastOut.append(np.copy(out))
 
             j += ([-1*v for v in y[i]] * np.log(out) - (np.ones(len(y[i])) - y[i]) * np.log(1 - out)).sum()
         j /= len(x)
