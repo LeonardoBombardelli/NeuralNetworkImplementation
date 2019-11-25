@@ -221,6 +221,29 @@ class NeuralNetwork():
     def getPredictions(self):
         return self.activation[len(self.activation)-1][1:]
 
+    def backpropagationTest(self, x, y):
+        print('WEIGHTS')
+        print(self.weights)
+        print('J = ', self.computeCost(x, y, reg=False))
+        print('J + S = ', self.computeCost(x, y, reg=True))
+        self.setGradientZero()
+        for j in range(len(x)):
+            self.updateGradient(x[j], y[j])
+        print('LAST INSTANCE ACTIVATION')
+        print(self.activation)
+        print('LAST INSTANCE DELTA')
+        print(self.delta)
+        print('GRADIENT BEFORE REGULARIZATION')
+        print(self.gradient)
+        self.gradientRegularization(len(x))
+        print('GRADIENT AFTER REGULARIZATION')
+        print(self.gradient)
+        self.updateTheta()
+        print('WEIGHTS AFTER UPDATE')
+        print(self.weights)
+        print('J = ', self.computeCost(x, y, reg=False))
+        print('J + S = ', self.computeCost(x, y, reg=True))
+
     def numericalCheck(self, x, y):
         eps = 0.000005
         diff = [np.zeros_like(arr) for arr in self.gradient]
