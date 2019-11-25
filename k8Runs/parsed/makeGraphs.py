@@ -5,15 +5,20 @@ import pandas as pd
 
 from glob import glob
 
-allMeans = glob("./k8Runs/parsed/mean-*.csv")
-allStd = glob("./k8Runs/parsed/std-*.csv")
+def createTitle(nameFile):
+    return(nameFile.split("/")[-1].replace("a0.2", "").replace("a0.1", "").replace("a0", "").replace(".txt",""))
 
-allMeans.sort()
-allStd.sort()
+allFiles = glob("./k8Runs/*.txt")
 
-df = pd.read_csv(allMeans[0])
-df.insert(3, "std", pd.read_csv(allStd[0])["Accuracy"], True)
-print(df)
-ax = sns.lineplot(x="Iteration", y="Accuracy", data=df)
+for name in allFiles:
+    df = pd.read_csv(name, names=["Iteration","Accuracy","J","F1"])
 
-plt.show()
+    # ax = sns.lineplot(x="Iteration", y="Accuracy", data=df).set_title(createTitle(name))
+    # ax = sns.lineplot(x="Iteration", y="J", data=df, color="red").set_title(createTitle(name))
+    ax = sns.lineplot(x="Iteration", y="F1", data=df, color="green").set_title(createTitle(name))
+
+    plt.ylim(0, 1)
+
+    # plt.show()
+    plt.savefig("./k8Runs/plots/"+createTitle(name)+"F1.png")
+    plt.close()
