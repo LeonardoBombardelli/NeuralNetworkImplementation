@@ -50,8 +50,8 @@ class NeuralNetwork():
         gradient = []
         for i in range(len(self.architecture)-1):
             # Destination, origin; self.architecture[i]+1 to account for bias
-            layer = np.random.rand(self.architecture[i+1],
-                                   self.architecture[i]+1)
+            layer = np.random.normal(size=(self.architecture[i+1],
+                                   self.architecture[i]+1))
             layer = (layer - 0.5) * 2
             weights.append(layer)
             gradient.append(np.empty((self.architecture[i+1],
@@ -285,14 +285,14 @@ class NeuralNetwork():
                     with open(saveResults, "a+") as openFile:
                         openFile.write(str(i) + ", " + \
                             str(self.getAccuracy(y)) + ", " + str(self.lastjCost) + ", " + str(self.getF1Measure(y)) +"\n")
-                    
+
                     self.computeCost(xEval, yEval)
                     with open(saveResults.split(".")[0] + "Eval.txt", "a+") as openFile:
                         openFile.write(str(i) + ", " + \
                             str(self.getAccuracy(yEval)) + ", " + str(self.lastjCost) + ", " + str(self.getF1Measure(yEval)) +"\n")
-                    
 
-                        
+
+
 
             if self.verbose:
                 print('Weights:')
