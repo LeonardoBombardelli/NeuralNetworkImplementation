@@ -231,6 +231,7 @@ class NeuralNetwork():
         self.setGradientZero()
         for j in range(len(x)):
             self.updateGradient(x[j], y[j])
+        self.gradient = np.divide(self.gradient, len(x))
         print('Computed gradient:')
         for l in self.gradient:
             print(l)
